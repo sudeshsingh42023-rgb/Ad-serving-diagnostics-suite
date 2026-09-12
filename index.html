@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Ad Serving Partner Integration Health</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: #f6f7f9; margin: 0; padding: 24px; color: #1a1a1a; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: white; border-radius: 10px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; }
+  th { color: #666; font-weight: 600; }
+  .score { font-weight: 700; padding: 2px 8px; border-radius: 6px; color: white; display: inline-block; }
+  .score-good { background: #2ea043; }
+  .score-warn { background: #d29922; }
+  .score-bad { background: #cf222e; }
+  .badge { display: inline-block; background: #eef1f5; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-right: 4px; color: #444; }
+  select { padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 10px; }
+  .api-note { font-size: 12px; color: #999; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<h1>Partner Integration Health Dashboard</h1>
+<div class="subtitle">Ad serving diagnostics — OpenRTB / VAST validation across active partners</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Partner Leaderboard</h3>
+    <table id="partner-table">
+      <thead>
+        <tr><th>Partner</th><th>Health Score</th><th>Events</th><th>Top Issues</th></tr>
+      </thead>
+      <tbody id="partner-table-body">
+        <tr><td colspan="4">Loading — start the API (uvicorn api:app --reload) then refresh.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Health Score Trend</h3>
+    <select id="partner-select"></select>
+    <canvas id="trend-chart" height="180"></canvas>
+  </div>
+</div>
+
+<div class="api-note">Data source: FastAPI backend at <code>http://localhost:8000</code>. Run <code>python src/generate_logs.py</code> then <code>uvicorn api:app --reload --port 8000</code> from the <code>src/</code> folder.</div>
+
+<script>
+const API_BASE = "http://localhost:8000";
+let chart;
+
+function scoreClass(score) {
+  if (score >= 90) return "score-good";
+  if (score >= 70) return "score-warn";
+  return "score-bad";
+}
+
+async function loadPartners() {
+  const res = await fetch(`${API_BASE}/api/partners`);
+  const partners = await res.json();
+
+  const tbody = document.getElementById("partner-table-body");
+  tbody.innerHTML = "";
+  const select = document.getElementById("partner-select");
+  select.innerHTML = "";
+
+  partners.forEach(p => {
+    const issues = p.top_failure_modes.map(f => `<span class="badge">${f.code} (${f.count})</span>`).join(" ") || "—";
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.partner_name}</td>
+        <td><span class="score ${scoreClass(p.avg_health_score)}">${p.avg_health_score}</span></td>
+        <td>${p.total_events}</td>
+        <td>${issues}</td>
+      </tr>`;
+    const opt = document.createElement("option");
+    opt.value = p.partner_id;
+    opt.textContent = p.partner_name;
+    select.appendChild(opt);
+  });
+
+  if (partners.length) loadTrend(partners[0].partner_id);
+  select.addEventListener("change", e => loadTrend(e.target.value));
+}
+
+async function loadTrend(partnerId) {
+  const res = await fetch(`${API_BASE}/api/partners/${partnerId}/trend`);
+  const trend = await res.json();
+  const labels = trend.map(t => t.date);
+  const scores = trend.map(t => t.score);
+
+  const ctx = document.getElementById("trend-chart").getContext("2d");
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{ label: "Health Score", data: scores, borderColor: "#2f6fed", tension: 0.25, fill: false }]
+    },
+    options: { scales: { y: { min: 0, max: 100 } } }
+  });
+}
+
+loadPartners().catch(err => {
+  document.getElementById("partner-table-body").innerHTML =
+    `<tr><td colspan="4">Couldn't reach the API at ${API_BASE}. Make sure it's running.</td></tr>`;
+  console.error(err);
+});
+</script>
+
+</body>
+</html>

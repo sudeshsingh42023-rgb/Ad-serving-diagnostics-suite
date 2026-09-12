@@ -1,0 +1,102 @@
+[
+  {
+    "partner_id": "partner_delta",
+    "partner_name": "Delta Mobile Apps",
+    "avg_health_score": 73.0,
+    "total_events": 253,
+    "top_failure_modes": [
+      {
+        "code": "LATENCY_CRITICAL",
+        "count": 20
+      },
+      {
+        "code": "MISSING_REQUIRED_FIELD",
+        "count": 17
+      },
+      {
+        "code": "MISSING_IMP_FIELD",
+        "count": 13
+      }
+    ]
+  },
+  {
+    "partner_id": "partner_bravo",
+    "partner_name": "Bravo Publishing Group",
+    "avg_health_score": 73.3,
+    "total_events": 245,
+    "top_failure_modes": [
+      {
+        "code": "LATENCY_CRITICAL",
+        "count": 16
+      },
+      {
+        "code": "MISSING_REQUIRED_FIELD",
+        "count": 14
+      },
+      {
+        "code": "UNRESOLVED_MACRO",
+        "count": 7
+      }
+    ]
+  },
+  {
+    "partner_id": "partner_charlie",
+    "partner_name": "Charlie Video Platform",
+    "avg_health_score": 86.5,
+    "total_events": 254,
+    "top_failure_modes": [
+      {
+        "code": "MISSING_IMP_FIELD",
+        "count": 11
+      },
+      {
+        "code": "LATENCY_CRITICAL",
+        "count": 10
+      },
+      {
+        "code": "UNRESOLVED_MACRO",
+        "count": 6
+      }
+    ]
+  },
+  {
+    "partner_id": "partner_echo",
+    "partner_name": "Echo News Network",
+    "avg_health_score": 94.6,
+    "total_events": 208,
+    "top_failure_modes": [
+      {
+        "code": "MISSING_IMP_FIELD",
+        "count": 7
+      },
+      {
+        "code": "MISSING_REQUIRED_FIELD",
+        "count": 5
+      },
+      {
+        "code": "UNRESOLVED_MACRO",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "partner_id": "partner_alpha",
+    "partner_name": "Alpha Media Network",
+    "avg_health_score": 98.0,
+    "total_events": 240,
+    "top_failure_modes": [
+      {
+        "code": "MISSING_REQUIRED_FIELD",
+        "count": 4
+      },
+      {
+        "code": "MISSING_IMP_FIELD",
+        "count": 1
+      },
+      {
+        "code": "LATENCY_CRITICAL",
+        "count": 1
+      }
+    ]
+  }
+]
